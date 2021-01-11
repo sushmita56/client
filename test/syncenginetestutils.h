@@ -175,6 +175,8 @@ public:
     FakeReply(QObject *parent);
     virtual ~FakeReply();
 
+    virtual void respond() = 0;
+
     // useful to be public for testing
     using QNetworkReply::setRawHeader;
 };
@@ -187,7 +189,7 @@ public:
 
     FakePropfindReply(FileInfo &remoteRootFileInfo, QNetworkAccessManager::Operation op, const QNetworkRequest &request, QObject *parent);
 
-    Q_INVOKABLE void respond();
+    Q_INVOKABLE void respond() override;
 
     Q_INVOKABLE void respond404();
 
@@ -219,7 +221,7 @@ class FakeMkcolReply : public FakeReply
 public:
     FakeMkcolReply(FileInfo &remoteRootFileInfo, QNetworkAccessManager::Operation op, const QNetworkRequest &request, QObject *parent);
 
-    Q_INVOKABLE void respond();
+    Q_INVOKABLE void respond() override;
 
     void abort() override { }
     qint64 readData(char *, qint64) override { return 0; }
@@ -314,7 +316,7 @@ public:
     FakePayloadReply(QNetworkAccessManager::Operation op, const QNetworkRequest &request,
         const QByteArray &body, QObject *parent);
 
-    void respond();
+    virtual void respond();
 
     void abort() override {}
     qint64 readData(char *buf, qint64 max) override;
@@ -355,6 +357,7 @@ public:
     FakeHangingReply(QNetworkAccessManager::Operation op, const QNetworkRequest &request, QObject *parent);
 
     void abort() override;
+    void respond() {};
     qint64 readData(char *, qint64) override { return 0; }
 };
 

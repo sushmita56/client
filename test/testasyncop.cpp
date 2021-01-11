@@ -41,6 +41,20 @@ public:
     qint64 readData(char *, qint64) override { return 0; }
 };
 
+class FakeJsonPayloadReply : public FakePayloadReply
+{
+    Q_OBJECT
+public:
+    FakeJsonPayloadReply(QNetworkAccessManager::Operation op, const QNetworkRequest &request,
+        const QByteArray &body, QObject *parent)
+        : FakePayloadReply(op, request, body, parent)
+    {
+    }
+    void respond() override {
+        setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
+        FakePayloadReply::respond();
+    }
+};
 
 class TestAsyncOp : public QObject
 {
@@ -119,19 +133,19 @@ private slots:
         auto successCallback = [](TestCase *tc, const QNetworkRequest &request) {
             tc->pollRequest = [](TestCase *, const QNetworkRequest &) -> QNetworkReply * { std::abort(); }; // shall no longer be called
             FileInfo *info = tc->perform();
-            QByteArray body = "{ \"status\":\"finished\", \"ETag\":\"\\\"" + info->etag + "\\\"\", \"fileId\":\"" + info->fileId + "\"}\n";
-            return new FakePayloadReply(QNetworkAccessManager::GetOperation, request, body, nullptr);
+            const QByteArray body = "{ \"status\":\"finished\", \"ETag\":\"\\\"" + info->etag + "\\\"\", \"fileId\":\"" + info->fileId + "\"}\n";
+            return new FakeJsonPayloadReply(QNetworkAccessManager::GetOperation, request, body, nullptr);
         };
         // Callback that never finishes
         auto waitForeverCallback = [](TestCase *, const QNetworkRequest &request) {
-            QByteArray body = "{\"status\":\"started\"}\n";
-            return new FakePayloadReply(QNetworkAccessManager::GetOperation, request, body, nullptr);
+            const QByteArray body = "{\"status\":\"started\"}\n";
+            return new FakeJsonPayloadReply(QNetworkAccessManager::GetOperation, request, body, nullptr);
         };
         // Callback that simulate an error.
         auto errorCallback = [](TestCase *tc, const QNetworkRequest &request) {
             tc->pollRequest = [](TestCase *, const QNetworkRequest &) -> QNetworkReply * { std::abort(); }; // shall no longer be called;
-            QByteArray body = "{\"status\":\"error\",\"errorCode\":500,\"errorMessage\":\"TestingErrors\"}\n";
-            return new FakePayloadReply(QNetworkAccessManager::GetOperation, request, body, nullptr);
+            const QByteArray body = "{\"status\":\"error\",\"errorCode\":500,\"errorMessage\":\"TestingErrors\"}\n";
+            return new FakeJsonPayloadReply(QNetworkAccessManager::GetOperation, request, body, nullptr);
         };
         // This lambda takes another functor as a parameter, and returns a callback that will
         // tell the client needs to poll again, and further call to the poll url will call the
@@ -139,8 +153,8 @@ private slots:
         auto waitAndChain = [](const TestCase::PollRequest_t &chain) {
             return [chain](TestCase *tc, const QNetworkRequest &request) {
                 tc->pollRequest = chain;
-                QByteArray body = "{\"status\":\"started\"}\n";
-                return new FakePayloadReply(QNetworkAccessManager::GetOperation, request, body, nullptr);
+                const QByteArray body = "{\"status\":\"started\"}\n";
+                return new FakeJsonPayloadReply(QNetworkAccessManager::GetOperation, request, body, nullptr);
             };
         };
 
