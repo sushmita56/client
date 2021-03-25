@@ -380,25 +380,27 @@ bool LsColJob::finished()
 
     QString contentType = reply()->header(QNetworkRequest::ContentTypeHeader).toString();
     int httpCode = reply()->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    if (httpCode == 207 && contentType.contains(QLatin1String("application/xml; charset=utf-8"))) {
-        LsColXMLParser parser;
-        connect(&parser, &LsColXMLParser::directoryListingSubfolders,
-            this, &LsColJob::directoryListingSubfolders);
-        connect(&parser, &LsColXMLParser::directoryListingIterated,
-            this, &LsColJob::directoryListingIterated);
-        connect(&parser, &LsColXMLParser::finishedWithError,
-            this, &LsColJob::finishedWithError);
-        connect(&parser, &LsColXMLParser::finishedWithoutError,
-            this, &LsColJob::finishedWithoutError);
+    if (httpCode == 207) {
+        if (contentType.contains(QLatin1String("application/xml; charset=utf-8"))) {
+            LsColXMLParser parser;
+            connect(&parser, &LsColXMLParser::directoryListingSubfolders,
+                this, &LsColJob::directoryListingSubfolders);
+            connect(&parser, &LsColXMLParser::directoryListingIterated,
+                this, &LsColJob::directoryListingIterated);
+            connect(&parser, &LsColXMLParser::finishedWithError,
+                this, &LsColJob::finishedWithError);
+            connect(&parser, &LsColXMLParser::finishedWithoutError,
+                this, &LsColJob::finishedWithoutError);
 
-        QString expectedPath = reply()->request().url().path(); // something like "/owncloud/remote.php/webdav/folder"
-        if (!parser.parse(reply()->readAll(), &_sizes, expectedPath)) {
-            // XML parse error
+            QString expectedPath = reply()->request().url().path(); // something like "/owncloud/remote.php/webdav/folder"
+            if (!parser.parse(reply()->readAll(), &_sizes, expectedPath)) {
+                // XML parse error
+                emit finishedWithError(reply());
+            }
+        } else {
+            // wrong content type
             emit finishedWithError(reply());
         }
-    } else if (httpCode == 207) {
-        // wrong content type
-        emit finishedWithError(reply());
     } else {
         // wrong HTTP code or any other network error
         emit finishedWithError(reply());
