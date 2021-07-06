@@ -3,9 +3,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <pact_mock_server_ffi.h>
-#include <filesystem>
-#include <optional>
+#include "pact_mock_server_ffi.h"
+#include <experimental/filesystem>
+#include <experimental/optional>
 #include <functional>
 #include "matchers.h"
 
@@ -48,7 +48,7 @@ namespace pact_consumer {
   /**
    * Type of Pact test result
    */
-  enum TestResultState {
+  enum TestResultState { 
     Mismatches        = (1u << 0),
     UserCodeFailed    = (1u << 1),
     PactFileError     = (1u << 2),
@@ -90,7 +90,7 @@ namespace pact_consumer {
     private:
       unsigned int status = 0;
       std::vector<std::string> messages;
-      std::optional<std::string> ex;
+      std::experimental::optional<std::string> ex;
   };
 
   /**
@@ -172,7 +172,7 @@ namespace pact_consumer {
      * Sets the headers for the request
      */
     Interaction withHeaders(const std::unordered_map<std::string, std::vector<std::string>>& headers) const;
-
+    
     /**
      * Sets the body for the request to the string contents.
      */
@@ -187,13 +187,13 @@ namespace pact_consumer {
      * Sets the body for the request using the example file and content type. Note that this will attempt to load the
      * entire example file in memory. Use small files for your testing.
      */
-    Interaction withBinaryFile(const std::string& content_type, const std::filesystem::path& example_file) const;
+    Interaction withBinaryFile(const std::string& content_type, const std::experimental::filesystem::path& example_file) const;
 
     /**
      * Sets the body for the request as a MIME multipart body using the example file and content type. Note that this will attempt to load the
      * entire example file in memory. Use small files for your testing.
      */
-    Interaction withMultipartFileUpload(const std::string& part_name, const std::string& content_type, const std::filesystem::path& example_file) const;
+    Interaction withMultipartFileUpload(const std::string& part_name, const std::string& content_type, const std::experimental::filesystem::path& example_file) const;
 
     /**
      * Sets the status code for the response
@@ -217,15 +217,15 @@ namespace pact_consumer {
 
     /**
      * Sets the body for the response using the example file and content type. Note that this will attempt to load the
-     * entire example file in memory. Use small files for your testing.
+     * entire example file in memory. Use small files for your testing. 
      */
-    Interaction withResponseBinaryFile(const std::string& content_type, const std::filesystem::path& example_file) const;
+    Interaction withResponseBinaryFile(const std::string& content_type, const std::experimental::filesystem::path& example_file) const;
 
     /**
      * Sets the body for the response as a MIME multipart body using the example file and content type. Note that this will attempt to load the
-     * entire example file in memory. Use small files for your testing.
+     * entire example file in memory. Use small files for your testing. 
      */
-    Interaction withResponseMultipartFileUpload(const std::string& part_name, const std::string& content_type, const std::filesystem::path& example_file) const;
+    Interaction withResponseMultipartFileUpload(const std::string& part_name, const std::string& content_type, const std::experimental::filesystem::path& example_file) const;
 
     pact_mock_server_ffi::InteractionHandle interaction;
 

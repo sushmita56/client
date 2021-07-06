@@ -3,8 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <memory>
-#include <optional>
-#include <boost/throw_exception.hpp>
+#include <experimental/optional>
 #include <sstream>
 #include <vector>
 
@@ -37,7 +36,7 @@ namespace pact_consumer::matchers {
       virtual std::string getJson() const;
 
     private:
-      std::optional<long> value;
+      std::experimental::optional<long> value;
   };
 
   class DecimalMatcher : public IMatcher {
@@ -49,7 +48,7 @@ namespace pact_consumer::matchers {
       virtual std::string getJson() const;
 
     private:
-      std::optional<double> value;
+      std::experimental::optional<double> value;
   };
 
   template<typename T>
@@ -72,7 +71,7 @@ namespace pact_consumer::matchers {
       virtual std::string getJson() const;
 
     private:
-      std::optional<T> value;
+      std::experimental::optional<T> value;
   };
 
   template<typename T>
@@ -150,8 +149,8 @@ namespace pact_consumer::matchers {
 
     private:
       int examples = 1;
-      std::optional<int> min;
-      std::optional<int> max;
+      std::experimental::optional<int> min;
+      std::experimental::optional<int> max;
       IMatcher::Ptr obj;
   };
 
