@@ -1,6 +1,7 @@
 #include <iostream>
-#include "consumer/consumer.h"
-#include "consumer/pact_mock_server_ffi.h"
+#include "gtest/gtest.h"
+#include "include/consumer.h"
+#include "include/pact_mock_server_ffi.h"
 
 using namespace pact_consumer;
 using namespace pact_consumer::matchers;
