@@ -1,10 +1,9 @@
 #include <iostream>
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 #include "include/consumer.h"
 #include "include/pact_mock_server_ffi.h"
 
 using namespace pact_consumer;
-using namespace pact_consumer::matchers;
 
 TEST(PactConsumerTest, GetJsonProjects) {
   auto provider = Pact("client", "oc-server");
