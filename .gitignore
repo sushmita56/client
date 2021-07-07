@@ -179,3 +179,4 @@ test/suite_oc-desktop/config.ini
 /test/pact/Makefile
 /.vscode/
 /test/pact/CMakeFiles/
+/test/pact/.vscode/
