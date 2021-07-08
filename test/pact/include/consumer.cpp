@@ -2,7 +2,6 @@
 #include <fstream>
 #include <stdlib.h>
 #include <sstream>
-#include <experimental/optional>
 #include "consumer.h"
 #include <boost/exception/diagnostic_information.hpp>
 #include "nlohmann/json.hpp"
@@ -123,7 +122,7 @@ namespace pact_consumer {
     }
     return *this;
   }
-  
+
   Interaction Interaction::withHeaders(const std::unordered_map<std::string, std::vector<std::string>>& headers) const {
     for (auto& h : headers) {
       for (auto it = h.second.begin(); it != h.second.end(); it++) {
@@ -139,27 +138,27 @@ namespace pact_consumer {
   }
 
   Interaction Interaction::withJsonBody(pact_consumer::matchers::IMatcher::Ptr body) const {
-    pact_mock_server_ffi::with_body(this->interaction, pact_mock_server_ffi::InteractionPart::Request, "application/json;charset=UTF-8", 
+    pact_mock_server_ffi::with_body(this->interaction, pact_mock_server_ffi::InteractionPart::Request, "application/json;charset=UTF-8",
       body->getJson().data());
     return *this;
   }
 
-  Interaction Interaction::withBinaryFile(const std::string& content_type, const std::experimental::filesystem::path& example_file) const {
+  Interaction Interaction::withBinaryFile(const std::string& content_type, const std::filesystem::path& example_file) const {
     std::ifstream file (example_file, std::ios::binary | std::ios::ate);
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
     std::vector<char> buffer(size);
     if (file.read(buffer.data(), size)) {
-      pact_mock_server_ffi::with_binary_file(this->interaction, pact_mock_server_ffi::InteractionPart::Request, content_type.data(), 
-        (const uint8_t*)buffer.data(), size);
+      pact_mock_server_ffi::with_binary_file(this->interaction, pact_mock_server_ffi::InteractionPart::Request, content_type.data(),
+        (uint8_t *) buffer.data(), size);
       return *this;
     } else {
       throw std::string("Could not read file contents: ") + example_file.string();
     }
   }
 
-  Interaction Interaction::withMultipartFileUpload(const std::string& part_name, const std::string& content_type, const std::experimental::filesystem::path& example_file) const {
-    auto result = pact_mock_server_ffi::with_multipart_file(this->interaction, pact_mock_server_ffi::InteractionPart::Request, content_type.data(), 
+  Interaction Interaction::withMultipartFileUpload(const std::string& part_name, const std::string& content_type, const std::filesystem::path& example_file) const {
+    auto result = pact_mock_server_ffi::with_multipart_file(this->interaction, pact_mock_server_ffi::InteractionPart::Request, content_type.data(),
       example_file.string().data(), part_name.data());
     if (result.tag == pact_mock_server_ffi::StringResult::Tag::Failed) {
       std::string error = result.failed._0;
@@ -184,33 +183,33 @@ namespace pact_consumer {
   }
 
   Interaction Interaction::withResponseBody(const std::string& body, const std::string& content_type) const {
-    pact_mock_server_ffi::with_body(this->interaction, pact_mock_server_ffi::InteractionPart::Response, content_type.data(), 
+    pact_mock_server_ffi::with_body(this->interaction, pact_mock_server_ffi::InteractionPart::Response, content_type.data(),
       body.data());
     return *this;
   }
 
   Interaction Interaction::withResponseJsonBody(pact_consumer::matchers::IMatcher::Ptr body) const {
-    pact_mock_server_ffi::with_body(this->interaction, pact_mock_server_ffi::InteractionPart::Response, "application/json;charset=UTF-8", 
+    pact_mock_server_ffi::with_body(this->interaction, pact_mock_server_ffi::InteractionPart::Response, "application/json;charset=UTF-8",
       body->getJson().data());
     return *this;
   }
 
-  Interaction Interaction::withResponseBinaryFile(const std::string& content_type, const std::experimental::filesystem::path& example_file) const {
+  Interaction Interaction::withResponseBinaryFile(const std::string& content_type, const std::filesystem::path& example_file) const {
     std::ifstream file (example_file, std::ios::binary | std::ios::ate);
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
     std::vector<char> buffer(size);
     if (file.read(buffer.data(), size)) {
-      pact_mock_server_ffi::with_binary_file(this->interaction, pact_mock_server_ffi::InteractionPart::Response, content_type.data(), 
-        (const uint8_t*)buffer.data(), size);
+      pact_mock_server_ffi::with_binary_file(this->interaction, pact_mock_server_ffi::InteractionPart::Response, content_type.data(),
+        (uint8_t *) buffer.data(), size);
       return *this;
     } else {
       throw std::string("Could not read file contents: ") + example_file.string();
     }
   }
 
-  Interaction Interaction::withResponseMultipartFileUpload(const std::string& part_name, const std::string& content_type, const std::experimental::filesystem::path& example_file) const {
-    auto result = pact_mock_server_ffi::with_multipart_file(this->interaction, pact_mock_server_ffi::InteractionPart::Response, content_type.data(), 
+  Interaction Interaction::withResponseMultipartFileUpload(const std::string& part_name, const std::string& content_type, const std::filesystem::path& example_file) const {
+    auto result = pact_mock_server_ffi::with_multipart_file(this->interaction, pact_mock_server_ffi::InteractionPart::Response, content_type.data(),
       example_file.string().data(), part_name.data());
     if (result.tag == pact_mock_server_ffi::StringResult::Tag::Failed) {
       std::string error = result.failed._0;
@@ -338,10 +337,8 @@ namespace pact_consumer {
         } else {
           std::cout << "  * Test callback failed with an exception: " << message << "\n\n";
         }
-        try {
+        if (ex.has_value()) {
           std::cout << "    " << ex.value() << "\n";
-        } catch(const std::logic_error& e) {
-          std::cout << e.what() << '\n';
         }
       }
       if (this->status & TestResultState::PactFileError) {

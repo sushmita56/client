@@ -100,6 +100,25 @@ const char *version();
 /// Exported functions are inherently unsafe.
 void init(const char *log_env_var);
 
+/// Initialises logging, and sets the log level explicitly.
+///
+/// # Safety
+///
+/// Exported functions are inherently unsafe.
+void init_with_log_level(const char *level);
+
+/// Log using the shared core logging facility.
+///
+/// This is useful for callers to have a single set of logs.
+///
+/// * `source` - String. The source of the log, such as the class or caller framework to
+///                      disambiguate log lines from the rust logging (e.g. pact_go)
+/// * `log_level` - String. One of TRACE, DEBUG, INFO, WARN, ERROR
+/// * `message` - Message to log
+///
+/// Exported functions are inherently unsafe.
+void log_message(const char *source, const char *log_level, const char *message);
+
 /// External interface to create a mock server. A pointer to the pact JSON as a C string is passed in,
 /// as well as the port for the mock server to run on. A value of 0 for the port will result in a
 /// port being allocated by the operating system. The port of the mock server is returned.

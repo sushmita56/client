@@ -1,7 +1,7 @@
 #include "matchers.h"
-#include <pact_mock_server_ffi.h>
+#include "pact_mock_server_ffi.h"
 #include <iostream>
-#include <nlohmann/json.hpp>
+#include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
@@ -42,7 +42,7 @@ namespace pact_consumer::matchers {
   IMatcher::Ptr Like(const char *value) {
     return std::make_shared<TypeMatcher<std::string>>(value);
   }
-  
+
   IMatcher::Ptr Like(bool value) {
     return std::make_shared<TypeMatcher<bool>>(value);
   }
@@ -543,7 +543,7 @@ namespace pact_consumer::matchers {
       array.push_back(json::parse(v->getJson()));
     }
     j["variants"] = array;
-    
+
     return j.dump();
   }
 }
