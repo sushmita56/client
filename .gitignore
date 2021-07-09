@@ -180,3 +180,5 @@ test/suite_oc-desktop/config.ini
 /.vscode/
 /test/pact/CMakeFiles/
 /test/pact/.vscode/
+/test/pact/cmake_install.cmake
+/test/pact/contracts

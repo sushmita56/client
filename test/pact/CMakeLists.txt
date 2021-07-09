@@ -14,22 +14,18 @@ include_directories(${GTEST_INCLUDE_DIRS})
 # libraries to include
 set(INCLUDE_LIBS
   ${GTEST_LIBRARIES}
+  pact-cpp-consumer
   pact_mock_server_ffi
   pthread
 )
 
 set(EXECUTABLE_NAME contracts)
 
-set(PACT_CONSUMER
-  include/consumer.cpp
-  include/matchers.cpp
-)
-
 set(TEST_SRCS
   pactHelper.cpp
 )
 
-add_executable(${EXECUTABLE_NAME} ${PACT_CONSUMER} ${TEST_SRCS})
+add_executable(${EXECUTABLE_NAME} ${TEST_SRCS})
 
 # link libraries
 target_link_libraries(${EXECUTABLE_NAME} ${INCLUDE_LIBS})
