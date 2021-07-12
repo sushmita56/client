@@ -1,0 +1,7 @@
+[requires]
+gtest/cci.20210126
+pact_ffi/0.0.0@pact/beta
+pact_cpp_consumer/0.1.1@pact/beta
+
+[generators]
+cmake

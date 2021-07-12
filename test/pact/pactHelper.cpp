@@ -1,13 +1,8 @@
 #include <iostream>
 #include <gtest/gtest.h>
-#include "include/consumer.h"
-#include "../../src/gui/owncloudgui.h"
+#include <consumer.h>
 
 using namespace pact_consumer;
-ownCloudGui *Application::gui() const
-{
-    return _gui;
-}
 
 TEST(ClientSharing, Public) {
   auto provider = Pact("client", "oc-server");
@@ -21,7 +16,6 @@ TEST(ClientSharing, Public) {
 
 
   auto result = provider.run_test([] (auto mock_server) {
-      gui = new ownCloudGui(this);
     return ::testing::UnitTest::GetInstance()->current_test_suite()->Passed();
   });
   EXPECT_TRUE(result.is_ok()) << "Test failed";

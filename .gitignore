@@ -175,10 +175,5 @@ FakesAssemblies/
 # squish test
 test/suite_oc-desktop/config.ini
 */**/__pycache__/
-/test/pact/CMakeCache.txt
-/test/pact/Makefile
 /.vscode/
-/test/pact/CMakeFiles/
-/test/pact/.vscode/
-/test/pact/cmake_install.cmake
-/test/pact/contracts
+/test/pact/build/
