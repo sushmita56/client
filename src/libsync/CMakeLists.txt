@@ -21,6 +21,7 @@ set(libsync_SRCS
     owncloudtheme.cpp
     ocisspacesman.cpp
     graphapijob.cpp
+    graphapi.cpp
     progressdispatcher.cpp
     propagatorjobs.cpp
     propagatedownload.cpp

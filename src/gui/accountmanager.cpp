@@ -437,6 +437,12 @@ void AccountManager::addAccountState(AccountState *accountState)
         this, &AccountManager::saveAccount);
 
     _accounts.insert(accountState->account()->uuid(), AccountStatePtr{accountState});
-    emit accountAdded(accountState);
+
+    QObject::connect(accountState->account().data(),
+                     &Account::spacesListRefreshed, [=]() {
+        emit accountAdded(accountState);
+    });
+    // call the spaces API on the account
+    accountState->account()->refreshSpaces();
 }
 }

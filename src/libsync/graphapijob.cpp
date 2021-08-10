@@ -22,12 +22,13 @@
 
 namespace OCC {
 
-Q_LOGGING_CATEGORY(lcOcs, "libsync.graphApi", QtInfoMsg)
+Q_LOGGING_CATEGORY(lcgraphapijob, "libsync.graphApiJob", QtInfoMsg)
 
 GraphApiJob::GraphApiJob(AccountPtr account)
     : AbstractNetworkJob(account, QString())
 {
     setIgnoreCredentialFailure(true);
+    setPath("graph/v1.0");
 }
 
 void GraphApiJob::addParam(const QString &name, const QString &value)
@@ -89,7 +90,7 @@ bool GraphApiJob::finished()
     QJsonParseError error;
     auto json = QJsonDocument::fromJson(replyData, &error);
     if (error.error != QJsonParseError::NoError) {
-        qCWarning(lcOcs) << "Could not parse reply to"
+        qCWarning(lcgraphapijob) << "Could not parse reply to"
                          << _verb
                          << Utility::concatUrlPath(account()->url(), path())
                          << _params
@@ -100,7 +101,7 @@ bool GraphApiJob::finished()
     QString message;
     const int statusCode = getJsonReturnCode(json, message);
     if (!_passStatusCodes.contains(statusCode)) {
-        qCWarning(lcOcs) << "Reply to"
+        qCWarning(lcgraphapijob) << "Reply to"
                          << _verb
                          << Utility::concatUrlPath(account()->url(), path())
                          << _params

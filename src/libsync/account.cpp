@@ -21,6 +21,7 @@
 #include "capabilities.h"
 #include "theme.h"
 #include "common/asserts.h"
+#include "graphapi.h"
 
 #include <QSettings>
 #include <QLoggingCategory>
@@ -150,6 +151,17 @@ void Account::setDavDisplayName(const QString &newDisplayName)
 QString Account::id() const
 {
     return _id;
+}
+
+void Account::refreshSpaces()
+{
+    // create a Graph API request. That might succeed or not, but in each case,
+    // the spacesListRefreshed signal must be emitted.
+
+    GraphMeDrivesJob job(sharedFromThis());
+    job.start();
+
+    emit spacesListRefreshed();
 }
 
 AbstractCredentials *Account::credentials() const

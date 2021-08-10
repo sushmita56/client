@@ -217,10 +217,15 @@ public:
 
     CredentialManager *credentialManager() const;
 
+
+
 public slots:
     /// Used when forgetting credentials
     void clearQNAMCache();
     void slotHandleSslErrors(QPointer<QNetworkReply>, const QList<QSslError> &);
+
+    /// Refresh the spaces list of this account
+    void refreshSpaces();
 
 signals:
     /// Emitted whenever there's network activity
@@ -242,6 +247,8 @@ signals:
 
     void accountChangedAvatar();
     void accountChangedDisplayName();
+
+    void spacesListRefreshed();
 
     void unknownConnectionState();
 
