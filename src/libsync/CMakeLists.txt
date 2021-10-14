@@ -37,6 +37,10 @@ set(libsync_SRCS
     creds/abstractcredentials.cpp
     creds/credentialscommon.cpp
     creds/oauth.cpp
+
+    graphapi/drives.cpp
+
+    networkjobs/jsonjob.cpp
 )
 
 if(TOKEN_AUTH_ONLY)

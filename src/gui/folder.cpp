@@ -29,6 +29,7 @@
 #include "filesystem.h"
 #include "folder.h"
 #include "folderman.h"
+#include "graphapi/drives.h"
 #include "localdiscoverytracker.h"
 #include "logger.h"
 #include "networkjobs.h"
@@ -165,6 +166,22 @@ Folder::Folder(const FolderDefinition &definition,
         // Initialize the vfs plugin
         startVfs();
     }
+
+    connect(_accountState.data(), &AccountState::destroyed, this, [this] {
+        qDebug() << "😭";
+    });
+    connect(_accountState.data(), &AccountState::isConnectedChanged, this, [this] {
+        auto drive = new GraphApi::Drives(_accountState->account());
+        connect(drive, &GraphApi::Drives::finishedSignal, [drive] {
+            qDebug() << "WTF KILL ME 😭";
+            qDebug() << drive->data();
+            auto foo = drive->drives();
+            if (!foo.isEmpty()) {
+                qDebug() << foo.first().id;
+            }
+        });
+        drive->start();
+    });
 }
 
 Folder::~Folder()

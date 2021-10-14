@@ -34,6 +34,8 @@
 #include "networkjobs.h"
 #include "guiutility.h"
 
+#include "graphapi/drives.h"
+
 namespace OCC {
 
 OwncloudAdvancedSetupPage::OwncloudAdvancedSetupPage()
