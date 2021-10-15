@@ -333,11 +333,11 @@ void NSISUpdater::slotDownloadFinished()
 
 void NSISUpdater::versionInfoArrived(const UpdateInfo &info)
 {
-    QSettings settings(ConfigFile::configFile(), QSettings::IniFormat);
-    qint64 infoVersion = Helper::stringVersionToInt(info.version());
-    auto seenString = settings.value(seenVersionC).toString();
-    qint64 seenVersion = Helper::stringVersionToInt(seenString);
-    qint64 currVersion = Helper::currentVersionToInt();
+    const QSettings settings(ConfigFile::configFile(), QSettings::IniFormat);
+    const auto infoVersion = Helper::stringVersionToInt(info.version());
+    const auto seenString = settings.value(seenVersionC, 0).toString();
+    const auto seenVersion = Helper::stringVersionToInt(seenString);
+    const auto currVersion = Helper::currentVersionToInt();
     qCInfo(lcUpdater) << "Version info arrived:"
             << "Your version:" << currVersion
             << "Skipped version:" << seenVersion << seenString

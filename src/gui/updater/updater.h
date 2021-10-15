@@ -31,9 +31,9 @@ class Updater : public QObject
 public:
     struct Helper
     {
-        static qint64 stringVersionToInt(const QString &version);
-        static qint64 currentVersionToInt();
-        static qint64 versionToInt(qint64 major, qint64 minor, qint64 patch, qint64 build);
+        static quint64 stringVersionToInt(const QString &version);
+        static quint64 currentVersionToInt();
+        static quint64 versionToInt(qint64 major, qint64 minor, qint64 patch, qint64 build);
     };
 
     static Updater *instance();
