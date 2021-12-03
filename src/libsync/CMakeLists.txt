@@ -42,6 +42,9 @@ set(libsync_SRCS
     creds/abstractcredentials.cpp
     creds/credentialscommon.cpp
     creds/oauth.cpp
+
+    abstractcorejob.cpp
+    determineauthtypejob2.cpp
 )
 
 if(TOKEN_AUTH_ONLY)

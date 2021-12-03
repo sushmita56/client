@@ -68,6 +68,7 @@ public:
 
     void runNewAccountWizard();
 
+    void runNewAccountWizard2();
 signals:
     void setupProxy();
 
@@ -160,6 +161,7 @@ private:
     QList<QAction *> _recentItemsActions;
     Application *_app;
     QPointer<OwncloudSetupWizard> _wizard;
+    QPointer<QWidget> _wizard2;
     QPointer<AboutDialog> _aboutDialog;
 };
 

@@ -8,6 +8,8 @@ endif()
 
 add_subdirectory(updater)
 
+add_subdirectory(wizard2)
+
 set(client_UI_SRCS
     aboutdialog.ui
     accountsettings.ui
@@ -132,7 +134,7 @@ endif()
 add_library(owncloudCore STATIC ${final_src})
 set_target_properties(owncloudCore PROPERTIES AUTOUIC ON AUTORCC ON)
 target_link_libraries(owncloudCore PUBLIC Qt5::Widgets Qt5::Network Qt5::Xml
-                                          libsync)
+                                          libsync wizard)
 
 add_subdirectory(socketapi)
 

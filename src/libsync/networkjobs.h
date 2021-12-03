@@ -381,7 +381,7 @@ private:
  * @brief Checks with auth type to use for a server
  * @ingroup libsync
  */
-class OWNCLOUDSYNC_EXPORT DetermineAuthTypeJob : public AbstractNetworkJob
+class LIBSYNC_DEPRECATED_EXPORT DetermineAuthTypeJob : public AbstractNetworkJob
 {
     Q_OBJECT
 public:

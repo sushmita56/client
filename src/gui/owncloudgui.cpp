@@ -32,6 +32,8 @@
 #include "creds/abstractcredentials.h"
 #include "guiutility.h"
 
+#include "wizard2/wizard.h"
+
 #include <QDesktopServices>
 #include <QDir>
 #include <QMessageBox>
@@ -954,6 +956,20 @@ void ownCloudGui::runNewAccountWizard()
         _wizard->startWizard();
     }
     raiseDialog(settingsDialog());
+}
+
+void ownCloudGui::runNewAccountWizard2()
+{
+    if (!_wizard2) {
+        auto wizard = new SetupWizard::Wizard(settingsDialog());
+        _wizard2 = wizard;
+        //        connect(wizard, &OwncloudSetupWizard::ownCloudWizardDone, _wizard, &OwncloudSetupWizard::deleteLater);
+        //        connect(wizard, &OwncloudSetupWizard::ownCloudWizardDone, ocApp(), &Application::slotownCloudWizardDone);
+        FolderMan::instance()->setSyncEnabled(false);
+        //        wizard->startWizard();
+        wizard->show();
+    }
+    raiseDialog(_wizard2);
 }
 
 void ownCloudGui::setPauseOnAllFoldersHelper(bool pause)

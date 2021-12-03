@@ -195,6 +195,14 @@ SettingsDialog::SettingsDialog(ownCloudGui *gui, QWidget *parent)
 
 
     if (Theme::instance()->multiAccount()) {
+        auto addAccountAction2 = createActionWithIcon(QStringLiteral("plus-solid"), tr("Add account new"));
+        addAccountAction2->setCheckable(false);
+        connect(addAccountAction2, &QAction::triggered, this, [] {
+            // don't directly connect here, ocApp might not be defined yet
+            ocApp()->gui()->runNewAccountWizard2();
+        });
+        _ui->toolBar->addAction(addAccountAction2);
+        // ----------------------------------------------------------
         _addAccountAction = createActionWithIcon(QStringLiteral("plus-solid"), tr("Add account"));
         _addAccountAction->setCheckable(false);
         connect(_addAccountAction, &QAction::triggered, this, []{
