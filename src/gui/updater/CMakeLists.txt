@@ -6,3 +6,22 @@ if(APPLE AND NOT BUILD_LIBRARIES_ONLY)
         set(OWNCLOUD_BUNDLED_RESOURCES ${OWNCLOUD_BUNDLED_RESOURCES} PARENT_SCOPE)
     endif()
 endif()
+
+target_sources(owncloudCore PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/ocupdater.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/ocupdater.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/updateinfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/updateinfo.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/updater.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/updater.h
+)
+
+if(SPARKLE_FOUND)
+    # Define this, we need to check in updater.cpp
+    target_compile_definitions(owncloudCore PUBLIC HAVE_SPARKLE)
+    target_sources(owncloudCore PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/sparkleupdater_mac.mm
+        ${CMAKE_CURRENT_SOURCE_DIR}/sparkleupdater.h
+    )
+    target_link_libraries(owncloudCore PRIVATE ${SPARKLE_LIBRARY})
+endif()
