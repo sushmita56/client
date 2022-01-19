@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 17)
 
 include(VERSION.cmake)
@@ -119,6 +119,12 @@ if(BUILD_CLIENT)
     if(APPLE)
         find_package(Sparkle REQUIRED)
     endif(APPLE)
+
+    option(WITH_APPIMAGEUPDATER OFF "Enable built-in libappimageupdate based updater on Linux")
+    add_feature_info(AppImageUpdate WITH_APPIMAGEUPDATER "Built-in libappimageupdate based updater")
+    if(WITH_APPIMAGEUPDATER)
+        find_package(AppImageUpdate REQUIRED)
+    endif()
 
     if(UNIX AND NOT APPLE)
         find_package(Inotify REQUIRED)
