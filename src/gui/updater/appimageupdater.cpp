@@ -83,7 +83,7 @@ public:
         // monitor progress and log status messages
         auto *timer = new QTimer(this);
 
-        timer->setInterval(1);
+        timer->setInterval(100);
 
         connect(timer, &QTimer::timeout, this, [=]() {
             _logStatusMessages();
@@ -121,7 +121,6 @@ bool AppImageUpdater::handleStartup()
 }
 
 void AppImageUpdater::versionInfoArrived(const UpdateInfo &info)
-
 {
     if (info.version().isEmpty() || Version::versionWithBuildNumber() >= QVersionNumber::fromString(info.version())) {
         qCInfo(lcUpdater) << "Client is on latest version!";
