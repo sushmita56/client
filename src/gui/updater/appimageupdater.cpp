@@ -148,6 +148,7 @@ void AppImageUpdater::versionInfoArrived(const UpdateInfo &info)
     if (!appImageUpdaterShim->isUpdateAvailable()) {
         qCCritical(lcUpdater) << "Update server reported that update is available, but AppImageUpdate disagrees, aborting";
         setDownloadState(DownloadFailed);
+        return;
     }
 
     auto dialog = new Ui::AppImageUpdateAvailableDialog(currentVersion, newVersion, ocApp()->gui()->settingsDialog());
