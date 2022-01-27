@@ -36,9 +36,9 @@
 #include <memory>
 
 namespace {
-QUrl uploadURL(const OCC::AccountPtr &account)
+auto uploadURL(const OCC::AccountPtr &account)
 {
-    return OCC::Utility::concatUrlPath(account->url(), QStringLiteral("remote.php/dav/files/%1/").arg(account->davUser()));
+    return QStringLiteral("remote.php/dav/files/%1/").arg(account->davUser());
 }
 
 QByteArray uploadOffset()
@@ -87,8 +87,8 @@ SimpleNetworkJob *PropagateUploadFileTUS::makeCreationWithUploadJob(QNetworkRequ
     qCDebug(lcPropagateUploadTUS) << "FullPath:" << propagator()->fullRemotePath(_item->_file);
     request->setRawHeader(QByteArrayLiteral("Upload-Metadata"), "filename " + propagator()->fullRemotePath(_item->_file).toUtf8().toBase64() + ",checksum " + checkSum);
     request->setRawHeader(QByteArrayLiteral("Upload-Length"), QByteArray::number(_item->_size));
-    auto job = new SimpleNetworkJob(propagator()->account(), this);
-    job->prepareRequest("POST", uploadURL(propagator()->account()), *request, device);
+    auto job = new SimpleNetworkJob(propagator()->account(), uploadURL(propagator()->account()), this);
+    job->prepareRequest("POST", device, *request);
     return job;
 }
 
@@ -140,8 +140,8 @@ void PropagateUploadFileTUS::startNextChunk()
     SimpleNetworkJob *job;
     if (_currentOffset != 0) {
         qCDebug(lcPropagateUploadTUS) << "Starting to patch upload:" << propagator()->fullRemotePath(_item->_file);
-        job = new SimpleNetworkJob(propagator()->account(), this);
-        job->prepareRequest("PATCH", _location, req, device);
+        job = new SimpleNetworkJob(propagator()->account(), _location.path(), this);
+        job->prepareRequest("PATCH", device, req);
     } else {
         OC_ASSERT(_location.isEmpty());
         qCDebug(lcPropagateUploadTUS) << "Starting creation with upload:" << propagator()->fullRemotePath(_item->_file);
@@ -180,8 +180,8 @@ void PropagateUploadFileTUS::slotChunkFinished()
             qCWarning(lcPropagateUploadTUS) << propagator()->fullRemotePath(_item->_file) << "Encountered a timeout -> get progrss for" << _location;
             QNetworkRequest req;
             setTusVersionHeader(req);
-            auto updateJob = new SimpleNetworkJob(propagator()->account(), this);
-            updateJob->prepareRequest("HEAD", _location, req);
+            auto updateJob = new SimpleNetworkJob(propagator()->account(), _location.path(), this);
+            updateJob->prepareRequest("HEAD", nullptr, req);
             _jobs.append(updateJob);
             connect(updateJob, &SimpleNetworkJob::finishedSignal, this, &PropagateUploadFileTUS::slotChunkFinished);
             connect(updateJob, &QObject::destroyed, this, &PropagateUploadFileCommon::slotJobDestroyed);

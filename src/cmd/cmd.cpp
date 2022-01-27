@@ -33,11 +33,12 @@
 #else
 # include "creds/httpcredentials.h"
 #endif
-#include "simplesslerrorhandler.h"
-#include "syncengine.h"
 #include "common/syncjournaldb.h"
 #include "config.h"
 #include "csync_exclude.h"
+#include "networkjobs/jsonjob.h"
+#include "simplesslerrorhandler.h"
+#include "syncengine.h"
 
 #include "theme.h"
 #include "netrcparser.h"
@@ -566,8 +567,8 @@ int main(int argc, char **argv)
 
     // Perform a call to get the capabilities.
     auto capabilitiesJob = new JsonApiJob(ctx.account, QLatin1String("ocs/v1.php/cloud/capabilities"));
-    QObject::connect(capabilitiesJob, &JsonApiJob::jsonReceived, qApp, [capabilitiesJob, ctx](const QJsonDocument &json) {
-        auto caps = json.object().value("ocs").toObject().value("data").toObject().value("capabilities").toObject();
+    QObject::connect(capabilitiesJob, &JsonApiJob::finishedSignal, qApp, [capabilitiesJob, ctx] {
+        auto caps = capabilitiesJob->data().value("ocs").toObject().value("data").toObject().value("capabilities").toObject();
         qDebug() << "Server capabilities" << caps;
         ctx.account->setCapabilities(caps.toVariantMap());
         ctx.account->setServerVersion(caps["core"].toObject()["status"].toObject()["version"].toString());
@@ -577,8 +578,8 @@ int main(int argc, char **argv)
         }
 
         auto userJob = new JsonApiJob(ctx.account, QLatin1String("ocs/v1.php/cloud/user"));
-        QObject::connect(userJob, &JsonApiJob::jsonReceived, qApp, [ctx](const QJsonDocument &json) {
-            const QJsonObject data = json.object().value("ocs").toObject().value("data").toObject();
+        QObject::connect(userJob, &JsonApiJob::finishedSignal, qApp, [userJob, ctx] {
+            const QJsonObject data = userJob->data().value("ocs").toObject().value("data").toObject();
             ctx.account->setDavUser(data.value("id").toString());
             ctx.account->setDavDisplayName(data.value("display-name").toString());
 
