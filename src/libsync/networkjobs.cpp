@@ -766,61 +766,64 @@ bool DetermineAuthTypeJob::finished()
     return true;
 }
 
-SimpleNetworkJob::SimpleNetworkJob(AccountPtr account, const QString &path, QObject *parent)
+SimpleNetworkJob::SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, const QNetworkRequest &req, QObject *parent)
     : AbstractNetworkJob(account, path, parent)
+    , _verb(verb)
+    , _request(req)
 {
+}
+
+SimpleNetworkJob::SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, const UrlQuery &arguments, const QNetworkRequest &req, QObject *parent)
+    : SimpleNetworkJob(account, path, verb, req, parent)
+{
+    if (verb == QByteArrayLiteral("GET")) {
+        // TODO: any better idea?
+        if (!arguments.isEmpty()) {
+            QUrlQuery args;
+            for (const auto &item : arguments) {
+                args.addQueryItem(
+                    QString::fromUtf8(QUrl::toPercentEncoding(item.first)),
+                    QString::fromUtf8(QUrl::toPercentEncoding(item.second)));
+            }
+            Q_ASSERT(_request.url().isEmpty());
+            _request.setUrl(Utility::concatUrlPath(simpleUrl(), QString(), args));
+        }
+    } else {
+        QUrlQuery query;
+        query.setQueryItems(arguments);
+        _body = query.query(QUrl::FullyEncoded).toUtf8();
+        _request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/x-www-form-urlencoded; charset=UTF-8"));
+    }
+}
+
+SimpleNetworkJob::SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, const QJsonObject &arguments, const QNetworkRequest &req, QObject *parent)
+    : SimpleNetworkJob(account, path, verb, QJsonDocument(arguments).toJson(), req, parent)
+{
+    _request.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
+}
+
+SimpleNetworkJob::SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, QIODevice *requestBody, const QNetworkRequest &req, QObject *parent)
+    : SimpleNetworkJob(account, path, verb, req, parent)
+{
+    _device = requestBody;
+}
+
+SimpleNetworkJob::SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, QByteArray &&requestBody, const QNetworkRequest &req, QObject *parent)
+    : SimpleNetworkJob(account, path, verb, new QBuffer(&_body), req, parent)
+{
+    _body = requestBody;
 }
 
 SimpleNetworkJob::~SimpleNetworkJob()
 {
 }
 
-void SimpleNetworkJob::prepareRequest(const QByteArray &verb, QIODevice *requestBody, const QNetworkRequest &req)
-{
-    _simpleVerb = verb;
-    _simpleRequest = req;
-    _simpleBody = requestBody;
-}
-
-void SimpleNetworkJob::prepareJsonRequest(const QByteArray &verb, const QJsonObject &arguments, const QNetworkRequest &req)
-{
-    // not a leak
-    auto requestBody = new QBuffer {};
-    requestBody->setData(QJsonDocument(arguments).toJson());
-    auto newReq = req;
-    newReq.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/json"));
-    return prepareRequest(verb, requestBody, newReq);
-}
-
-void SimpleNetworkJob::prepareQueryRequest(const QByteArray &verb, const QUrlQuery &arguments, const QNetworkRequest &req)
-{
-    auto newReq = req;
-    if (verb == QByteArrayLiteral("GET")) {
-        // TODO: any better idea?
-        if (!arguments.isEmpty()) {
-            QUrlQuery args;
-            for (const auto &item : arguments.queryItems()) {
-                args.addQueryItem(
-                    QString::fromUtf8(QUrl::toPercentEncoding(item.first)),
-                    QString::fromUtf8(QUrl::toPercentEncoding(item.second)));
-            }
-            newReq.setUrl(Utility::concatUrlPath(simpleUrl(), QString(), args));
-        }
-        return prepareRequest(verb, nullptr, newReq);
-    } else {
-        // not a leak
-        auto requestBody = new QBuffer {};
-        requestBody->setData(arguments.query(QUrl::FullyEncoded).toUtf8());
-        newReq.setHeader(QNetworkRequest::ContentTypeHeader, QStringLiteral("application/x-www-form-urlencoded; charset=UTF-8"));
-
-        return prepareRequest(verb, requestBody, newReq);
-    }
-}
 
 void SimpleNetworkJob::start()
 {
-    OC_ENFORCE(isPrepared());
-    sendRequest(_simpleVerb, simpleUrl(), _simpleRequest, _simpleBody);
+    Q_ASSERT(!_verb.isEmpty());
+    // AbstractNetworkJob will take ownership of the buffer
+    sendRequest(_verb, simpleUrl(), _request, _device);
     AbstractNetworkJob::start();
 }
 
@@ -830,13 +833,9 @@ bool SimpleNetworkJob::finished()
     return true;
 }
 
-bool SimpleNetworkJob::isPrepared() const
-{
-    return !_simpleVerb.isEmpty();
-}
 QUrl SimpleNetworkJob::simpleUrl() const
 {
-    auto url = _simpleRequest.url();
+    auto url = _request.url();
     if (url.isEmpty()) {
         url = Utility::concatUrlPath(account()->url(), path());
     }

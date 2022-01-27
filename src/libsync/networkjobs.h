@@ -356,30 +356,33 @@ class OWNCLOUDSYNC_EXPORT SimpleNetworkJob : public AbstractNetworkJob
 {
     Q_OBJECT
 public:
-    explicit SimpleNetworkJob(AccountPtr account, const QString &path, QObject *parent = nullptr);
+    using UrlQuery = QList<QPair<QString, QString>>;
+    explicit SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, const UrlQuery &arguments, const QNetworkRequest &req = QNetworkRequest(), QObject *parent = nullptr);
+    explicit SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, const QJsonObject &arguments, const QNetworkRequest &req = QNetworkRequest(), QObject *parent = nullptr);
+    explicit SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, QIODevice *requestBody, const QNetworkRequest &req = QNetworkRequest(), QObject *parent = nullptr);
+    explicit SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, QByteArray &&requestBody, const QNetworkRequest &req = QNetworkRequest(), QObject *parent = nullptr);
+
     virtual ~SimpleNetworkJob();
-
-    virtual void prepareQueryRequest(const QByteArray &verb, const QUrlQuery &arguments, const QNetworkRequest &req = QNetworkRequest());
-
-    virtual void prepareJsonRequest(const QByteArray &verb, const QJsonObject &arguments, const QNetworkRequest &req = QNetworkRequest());
-
-    virtual void prepareRequest(const QByteArray &verb, QIODevice *requestBody, const QNetworkRequest &req = QNetworkRequest());
 
     void start() override;
 
-
 signals:
+
+
     void finishedSignal(QNetworkReply *reply);
 
 protected:
-    bool isPrepared() const;
     bool finished() override;
 
+    QByteArray _verb;
+    QByteArray _body;
+    QNetworkRequest _request;
+    QIODevice *_device = nullptr;
+
 private:
+    explicit SimpleNetworkJob(AccountPtr account, const QString &path, const QByteArray &verb, const QNetworkRequest &req, QObject *parent);
+
     QUrl simpleUrl() const;
-    QByteArray _simpleVerb;
-    QIODevice *_simpleBody;
-    QNetworkRequest _simpleRequest;
 };
 
 /**

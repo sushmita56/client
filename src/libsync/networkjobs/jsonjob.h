@@ -13,11 +13,8 @@ class OWNCLOUDSYNC_EXPORT JsonJob : public SimpleNetworkJob
 {
     Q_OBJECT
 public:
-    explicit JsonJob(const AccountPtr &account, const QString &path, QObject *parent = nullptr);
+    using SimpleNetworkJob::SimpleNetworkJob;
     virtual ~JsonJob();
-    void start() override;
-
-    int status() const;
 
     const QJsonObject &data() const;
     const QJsonParseError &parseError() const;
@@ -53,14 +50,12 @@ class OWNCLOUDSYNC_EXPORT JsonApiJob : public JsonJob
 {
     Q_OBJECT
 public:
-    using JsonJob::JsonJob;
-    void prepareQueryRequest(const QByteArray &verb, const QUrlQuery &arguments, const QNetworkRequest &req = {}) override;
+    explicit JsonApiJob(AccountPtr account, const QString &path, const UrlQuery &arguments, const QNetworkRequest &req, QObject *parent);
+
     // the OCS status code: 100 (!) for success
     int ocsStatus() const;
-
 private:
-    using JsonJob::prepareJsonRequest;
-    using JsonJob::prepareRequest;
+    // using JsonJob::JsonJob;/
 
     int _ocsStatus = 0;
 

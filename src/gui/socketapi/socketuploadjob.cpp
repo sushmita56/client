@@ -51,7 +51,8 @@ SocketUploadJob::SocketUploadJob(const QSharedPointer<SocketApiJobV2> &job)
 
 void SocketUploadJob::prepareTag(const AccountPtr &account)
 {
-    auto tagJob = new OCC::SimpleNetworkJob(account, tagUrl(), this);
+    const QJsonObject json({ { QStringLiteral("name"), backupTagNameC() } });
+    auto tagJob = new OCC::SimpleNetworkJob(account, tagUrl(), "POST", json, {}, this);
     connect(tagJob, &OCC::SimpleNetworkJob::finishedSignal, this, [account, this] {
         auto propfindJob = new OCC::LsColJob(account, tagUrl(), this);
         propfindJob->setProperties({ QByteArrayLiteral("http://owncloud.org/ns:display-name"), QByteArrayLiteral("http://owncloud.org/ns:id") });
@@ -66,8 +67,6 @@ void SocketUploadJob::prepareTag(const AccountPtr &account)
         });
         propfindJob->start();
     });
-    const QJsonObject json({ { QStringLiteral("name"), backupTagNameC() } });
-    tagJob->prepareJsonRequest(QByteArrayLiteral("POST"), json);
     tagJob->start();
 }
 
@@ -130,7 +129,9 @@ void SocketUploadJob::start()
 
     connect(engine, &OCC::SyncEngine::finished, this, [engine, this](bool ok) {
         if (ok) {
-            auto tagJob = new OCC::SimpleNetworkJob(engine->account(), QStringLiteral("remote.php/dav/systemtags-relations/files/%1/%2").arg(_backupFileId, QString::number(_finisedTagId)), this);
+            auto tagJob = new OCC::SimpleNetworkJob(engine->account(),
+                QStringLiteral("remote.php/dav/systemtags-relations/files/%1/%2").arg(_backupFileId, QString::number(_finisedTagId)),
+                "PUT", {}, {}, this);
             connect(tagJob, &OCC::SimpleNetworkJob::finishedSignal, this, [tagJob, this] {
                 if (tagJob->reply()->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt() == 201) {
                     logMessage(_localPath, tr("Backup of %1 succeeded").arg(QDir::toNativeSeparators(_localPath)));
@@ -140,7 +141,6 @@ void SocketUploadJob::start()
                 }
             });
             OC_ASSERT(_finisedTagId > 0);
-            tagJob->prepareRequest(QByteArrayLiteral("PUT"), nullptr);
             tagJob->start();
         } else {
             fail(tr("Failed to create backup: %1").arg(_errorFiles.join(", ")));

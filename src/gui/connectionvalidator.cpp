@@ -226,7 +226,7 @@ void ConnectionValidator::slotAuthSuccess()
 void ConnectionValidator::checkServerCapabilities()
 {
     // The main flow now needs the capabilities
-    JsonApiJob *job = new JsonApiJob(_account, QLatin1String("ocs/v2.php/cloud/capabilities"), this);
+    JsonApiJob *job = new JsonApiJob(_account, QStringLiteral("ocs/v2.php/cloud/capabilities"), {}, {}, this);
     job->setTimeout(timeoutToUse);
 
     QObject::connect(job, &JsonApiJob::finishedSignal, this, [job, this] {
@@ -247,7 +247,7 @@ void ConnectionValidator::checkServerCapabilities()
 
 void ConnectionValidator::fetchUser()
 {
-    JsonApiJob *job = new JsonApiJob(_account, QLatin1String("ocs/v2.php/cloud/user"), this);
+    JsonApiJob *job = new JsonApiJob(_account, QLatin1String("ocs/v2.php/cloud/user"), {}, {}, this);
     job->setTimeout(timeoutToUse);
     QObject::connect(job, &JsonApiJob::finishedSignal, this, [job, this] {
         const QString user = job->data().value("ocs").toObject().value("data").toObject().value("id").toString();

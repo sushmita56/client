@@ -291,14 +291,14 @@ void OAuth::startAuthentication()
                         return;
                     }
                     // If the reply don't contains the user id, we must do another call to query it
-                    JsonApiJob *job = new JsonApiJob(_account->sharedFromThis(), QStringLiteral("ocs/v2.php/cloud/user"), this);
-                    job->setTimeout(qMin(job->timeoutSec(), 30s));
                     QNetworkRequest req;
                     // We are not connected yet so we need to handle the authentication manually
                     req.setRawHeader("Authorization", "Bearer " + accessToken.toUtf8());
                     // We just added the Authorization header, don't let HttpCredentialsAccessManager tamper with it
                     req.setAttribute(HttpCredentials::DontAddCredentialsAttribute, true);
-                    job->prepareQueryRequest("GET", QUrlQuery(), req);
+                    JsonApiJob *job = new JsonApiJob(_account->sharedFromThis(), QStringLiteral("ocs/v2.php/cloud/user"), {}, req, this);
+                    job->setTimeout(qMin(job->timeoutSec(), 30s));
+
                     connect(job, &JsonApiJob::finishedSignal, this, [=] {
                         if (job->ocsStatus() != 200) {
                             httpReplyAndClose(socket, QByteArrayLiteral("500 Internal Server Error"),
@@ -490,29 +490,31 @@ void OAuth::fetchWellKnown()
             _wellKnownFinished = true;
             Q_EMIT fetchWellKnownFinished();
         } else {
-            auto job = new JsonJob(_account->sharedFromThis(), QStringLiteral("/.well-known/openid-configuration"), this);
-            job->setAuthenticationJob(true);
-            job->setTimeout(qMin(30s, job->timeoutSec()));
-            QObject::connect(job, &JsonJob::finishedSignal, this, [job, this] {
+            QNetworkRequest req;
+            req.setAttribute(HttpCredentials::DontAddCredentialsAttribute, true);
+            req.setUrl(Utility::concatUrlPath(_account->url(), QStringLiteral("/.well-known/openid-configuration")));
+            auto reply = _account->networkAccessManager()->get(req);
+            QObject::connect(reply, &QNetworkReply::finished, this, [reply, this] {
                 _wellKnownFinished = true;
-                if (job->reply()->error() != QNetworkReply::NoError) {
+                if (reply->error() != QNetworkReply::NoError) {
                     // Most likely the file does not exist, default to the normal endpoint
                     Q_EMIT fetchWellKnownFinished();
                     return;
                 }
-                if (job->parseError().error == QJsonParseError::NoError) {
-                    _authEndpoint = QUrl::fromEncoded(job->data()[QStringLiteral("authorization_endpoint")].toString().toUtf8());
-                    _tokenEndpoint = QUrl::fromEncoded(job->data()[QStringLiteral("token_endpoint")].toString().toUtf8());
-                    _registrationEndpoint = QUrl::fromEncoded(job->data()[QStringLiteral("registration_endpoint")].toString().toUtf8());
+                QJsonParseError err;
+                QJsonObject data = QJsonDocument::fromJson(reply->readAll(), &err).object();
+                if (err.error == QJsonParseError::NoError) {
+                    _authEndpoint = QUrl::fromEncoded(data[QStringLiteral("authorization_endpoint")].toString().toUtf8());
+                    _tokenEndpoint = QUrl::fromEncoded(data[QStringLiteral("token_endpoint")].toString().toUtf8());
+                    _registrationEndpoint = QUrl::fromEncoded(data[QStringLiteral("registration_endpoint")].toString().toUtf8());
                     _redirectUrl = QStringLiteral("http://127.0.0.1");
-                } else if (job->parseError().error == QJsonParseError::IllegalValue) {
+                } else if (err.error == QJsonParseError::IllegalValue) {
                     qCDebug(lcOauth) << ".well-known did not return json, the server most probably does not support oidc";
                 } else {
-                    qCWarning(lcOauth) << "Json parse error in well-known: " << job->parseError().errorString();
+                    qCWarning(lcOauth) << "Json parse error in well-known: " << err.errorString();
                 }
                 Q_EMIT fetchWellKnownFinished();
             });
-            job->start();
         }
     });
     checkServer->start();

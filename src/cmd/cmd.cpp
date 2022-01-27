@@ -566,7 +566,7 @@ int main(int argc, char **argv)
     ctx.account->setSslErrorHandler(sslErrorHandler);
 
     // Perform a call to get the capabilities.
-    auto capabilitiesJob = new JsonApiJob(ctx.account, QLatin1String("ocs/v1.php/cloud/capabilities"));
+    auto capabilitiesJob = new JsonApiJob(ctx.account, QStringLiteral("ocs/v1.php/cloud/capabilities"), {}, {}, nullptr);
     QObject::connect(capabilitiesJob, &JsonApiJob::finishedSignal, qApp, [capabilitiesJob, ctx] {
         auto caps = capabilitiesJob->data().value("ocs").toObject().value("data").toObject().value("capabilities").toObject();
         qDebug() << "Server capabilities" << caps;
@@ -577,7 +577,7 @@ int main(int argc, char **argv)
             qFatal("Error connecting to server");
         }
 
-        auto userJob = new JsonApiJob(ctx.account, QLatin1String("ocs/v1.php/cloud/user"));
+        auto userJob = new JsonApiJob(ctx.account, QLatin1String("ocs/v1.php/cloud/user"), {}, {}, nullptr);
         QObject::connect(userJob, &JsonApiJob::finishedSignal, qApp, [userJob, ctx] {
             const QJsonObject data = userJob->data().value("ocs").toObject().value("data").toObject();
             ctx.account->setDavUser(data.value("id").toString());

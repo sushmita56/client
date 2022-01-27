@@ -11,12 +11,6 @@ Q_LOGGING_CATEGORY(lcJsonApiJob, "sync.networkjob.jsonapi", QtInfoMsg)
 
 using namespace OCC;
 
-JsonJob::JsonJob(const AccountPtr &account, const QString &path, QObject *parent)
-    : SimpleNetworkJob(account, path, parent)
-{
-    setPath(path);
-}
-
 JsonJob::~JsonJob()
 {
 }
@@ -50,27 +44,16 @@ const QJsonParseError &JsonJob::parseError() const
     return _parseError;
 }
 
-void JsonJob::start()
-{
-    // TODO: is this assumption sane
-    if (!isPrepared()) {
-        prepareQueryRequest(QByteArrayLiteral("GET"), QUrlQuery(), QNetworkRequest());
-    }
-    SimpleNetworkJob::start();
-}
-
 const QJsonObject &JsonJob::data() const
 {
     return _data;
 }
 
-void JsonApiJob::prepareQueryRequest(const QByteArray &verb, const QUrlQuery &arguments, const QNetworkRequest &req)
+
+JsonApiJob::JsonApiJob(AccountPtr account, const QString &path, const UrlQuery &arguments, const QNetworkRequest &req, QObject *parent)
+    : JsonJob(account, path, "GET", UrlQuery { { QStringLiteral("format"), QStringLiteral("json") } } + arguments, req, parent)
 {
-    QNetworkRequest request = req;
-    request.setRawHeader(QByteArrayLiteral("OCS-APIREQUEST"), QByteArrayLiteral("true"));
-    QUrlQuery query = arguments;
-    query.addQueryItem(QStringLiteral("format"), QStringLiteral("json"));
-    JsonJob::prepareQueryRequest(verb, query, request);
+    _request.setRawHeader(QByteArrayLiteral("OCS-APIREQUEST"), QByteArrayLiteral("true"));
 }
 
 int JsonApiJob::ocsStatus() const

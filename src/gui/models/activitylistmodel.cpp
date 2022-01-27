@@ -188,7 +188,8 @@ void ActivityListModel::startFetchJob(AccountStatePtr ast)
     if (!ast || !ast->isConnected()) {
         return;
     }
-    JsonApiJob *job = new JsonApiJob(ast->account(), QStringLiteral("ocs/v2.php/cloud/activity"), this);
+    JsonApiJob *job = new JsonApiJob(ast->account(), QStringLiteral("ocs/v2.php/cloud/activity"), { { QStringLiteral("page"), QStringLiteral("0") }, { QStringLiteral("pagesize"), QStringLiteral("100") } }, {}, this);
+
     QObject::connect(job, &JsonApiJob::finishedSignal,
         this, [job, ast, this] {
             _currentlyFetching.remove(ast);
@@ -225,10 +226,6 @@ void ActivityListModel::startFetchJob(AccountStatePtr ast)
 
             combineActivityLists();
         });
-    QUrlQuery params;
-    params.addQueryItem(QStringLiteral("page"), QStringLiteral("0"));
-    params.addQueryItem(QStringLiteral("pagesize"), QStringLiteral("100"));
-    job->prepareQueryRequest("GET", params);
 
     _currentlyFetching.insert(ast);
     qCInfo(lcActivity) << "Start fetching activities for " << ast->account()->displayName();

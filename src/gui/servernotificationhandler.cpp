@@ -49,7 +49,7 @@ void ServerNotificationHandler::slotFetchNotifications(AccountStatePtr ptr)
     }
 
     // if the previous notification job has finished, start next.
-    auto *job = new JsonApiJob(ptr->account(), notificationsPath, this);
+    auto *job = new JsonApiJob(ptr->account(), notificationsPath, {}, {}, this);
     QObject::connect(job, &JsonApiJob::finishedSignal,
         this, [job, ptr, this] {
             slotNotificationsReceived(job, ptr);
